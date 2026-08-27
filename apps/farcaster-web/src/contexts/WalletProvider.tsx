@@ -105,7 +105,7 @@ const WalletProvider = ({ children }: WalletProviderProps) => {
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
   const [preferredWallet, setPreferredWallet] = useState<string | undefined>(
-    () => localStorage.getItem(PREFERRED_WALLET_KEY) ?? undefined,
+    () => localStorage.getItem(PREFERRED_WALLET_KEY) ?? 'warpcast',
   );
   const [connectedProvider, setConnectedProvider] =
     useState<Provider.Provider>();

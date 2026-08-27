@@ -1,2 +1,2 @@
-'use strict';
+"use strict";
 it.todo('write a test');

@@ -20,6 +20,11 @@ const Analytics = {
     disabled = false;
 
     if (!posthogInitialized) {
+      if (!posthogApiKey || posthogApiKey === 'REPLACE_ME') {
+        posthogInitialized = true;
+        disabled = true;
+        return;
+      }
       posthog.init(posthogApiKey, {
         api_host: posthogApiHost,
         autocapture: false,

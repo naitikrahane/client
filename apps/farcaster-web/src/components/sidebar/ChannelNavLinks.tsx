@@ -394,8 +394,14 @@ const ChannelNavLinksContent: FC = () => {
 
 ChannelNavLinksContent.displayName = 'ChannelNavLinksContent';
 
+import { ErrorBoundary } from 'react-error-boundary';
+
 const ChannelNavLinks: FC = memo(() => {
-  return <ChannelNavLinksContent />;
+  return (
+    <ErrorBoundary fallback={null}>
+      <ChannelNavLinksContent />
+    </ErrorBoundary>
+  );
 });
 
 ChannelNavLinks.displayName = 'ChannelNavLinks';

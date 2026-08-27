@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Avatar } from '~/components/avatar/Avatar';
 import { FarcasterProBadge } from '~/components/badges/FarcasterProBadge';
 import { ConfirmationModal } from '~/components/modals/ConfirmationModal';
-import { formatElapsed, useSpace } from '~/contexts/SpaceContext';
+import { formatElapsed, useOptionalSpace } from '~/contexts/SpaceContext';
 import { useUserLevel } from '~/hooks/data/useUserLevel';
 import { useNavigate } from '~/hooks/navigation/useNavigate';
 import { cn } from '~/lib/utils';
@@ -17,6 +17,16 @@ import { cn } from '~/lib/utils';
  */
 const SpaceMiniPlayer: React.FC<{ compact?: boolean }> = React.memo(
   ({ compact = false }) => {
+    const space = useOptionalSpace();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isHostProUser = useUserLevel(space?.joined?.room.host) === 'pro';
+    const [endConfirmationOpen, setEndConfirmationOpen] = React.useState(false);
+
+    if (!space || !space.joined || space.removedByHostRoomId) {
+      return null;
+    }
+
     const {
       joined,
       elapsedSec,
@@ -25,15 +35,7 @@ const SpaceMiniPlayer: React.FC<{ compact?: boolean }> = React.memo(
       leave,
       endRoom,
       removedByHostRoomId,
-    } = useSpace();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const isHostProUser = useUserLevel(joined?.room.host) === 'pro';
-    const [endConfirmationOpen, setEndConfirmationOpen] = React.useState(false);
-
-    if (!joined || removedByHostRoomId) {
-      return null;
-    }
+    } = space;
 
     // Hide while the room is in front — the room has its own bottom controls.
     const roomPath = `/~/spaces/${joined.room.id}`;

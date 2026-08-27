@@ -1,36 +1,32 @@
-import { addPathToUrl, injectQueryParams } from 'farcaster-client-data';
 import {
   useFrameDetails,
   useGloballyCachedFrame,
 } from 'farcaster-client-hooks';
 import React from 'react';
 
+import { MiniApp } from '~/components/miniApp/MiniApp';
 import { FullScreenLoadingIndicator } from '~/components/loaders/FullScreenLoadingIndicator';
-import { useIsSignedIn } from '~/hooks/data/useIsSignedIn';
 import { useNavigate } from '~/hooks/navigation/useNavigate';
 import { useParams } from '~/hooks/navigation/useParams';
 import { useSearchParams } from '~/hooks/navigation/useSearchParams';
-import { useRedirectToWarpcastMobile } from '~/hooks/useRedirectToWarpcastMobile';
-import { HomeLandingPage } from '~/lazy/pages';
 
 const LaunchMiniAppPage: React.FC = React.memo(() => {
-  const isSignedIn = useIsSignedIn();
-
   const navigate = useNavigate();
-
-  useRedirectToWarpcastMobile();
 
   const {
     domain: domainParam,
     url,
-    ...extraParams
   } = useSearchParams('launchMiniApp');
-  const { id, '*': path } = useParams('miniAppsCanonical');
+  const { id } = useParams('miniAppsCanonical');
+
   const domain = (() => {
     if (url) {
-      return new URL(url).hostname;
+      try {
+        return new URL(url).hostname;
+      } catch {
+        return domainParam;
+      }
     }
-
     return domainParam;
   })();
 
@@ -40,42 +36,36 @@ const LaunchMiniAppPage: React.FC = React.memo(() => {
   });
   const frame = useGloballyCachedFrame(data);
 
-  const queryParams = Object.entries(extraParams).reduce(
-    (acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+  const launchUrl = url ?? frame?.homeUrl;
 
-  React.useEffect(() => {
-    if (!frame || frame.harmful) {
-      navigate({
-        to: 'miniApps',
-        params: {},
-        searchParams: {},
-      });
-      return;
-    }
+  const handleClose = React.useCallback(() => {
+    navigate({
+      to: 'homeFeed',
+      params: {},
+      searchParams: {},
+    });
+  }, [navigate]);
 
-    if (isSignedIn) {
-      navigate({
-        to: 'homeFeed',
-        params: {},
-        searchParams: {
-          launchFrameUrl: injectQueryParams(
-            addPathToUrl(url ?? frame.homeUrl, path),
-            queryParams,
-          ),
-        },
-      });
-    }
-  }, [frame, domain, isSignedIn, navigate, url, queryParams, path]);
+  if (!launchUrl) {
+    return <FullScreenLoadingIndicator />;
+  }
 
   return (
-    <>{isSignedIn ? <FullScreenLoadingIndicator /> : <HomeLandingPage />}</>
+    <div className="flex h-screen w-screen overflow-hidden bg-app">
+      <div className="flex-1">
+        <MiniApp
+          launchConfig={{
+            type: 'standalone',
+            url: launchUrl,
+            name: frame?.name || domain || 'Mini App',
+            splashImageUrl: frame?.splashImageUrl,
+            splashBackgroundColor: frame?.splashBackgroundColor,
+          }}
+          context={{ type: 'dev_preview' }}
+          onClose={handleClose}
+        />
+      </div>
+    </div>
   );
 });
 

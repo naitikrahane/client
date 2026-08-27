@@ -70,6 +70,8 @@ persistQueryClient({
   persister: localStoragePersister,
 } as unknown as PersistQueryClientOptions);
 
+import { NativeWalletRequestModal } from '~/components/wallet/NativeWalletRequestModal';
+
 const App: FC = () => {
   return (
     <HelmetProvider>
@@ -108,6 +110,7 @@ const App: FC = () => {
                                                       <MinimizableWindowProvider>
                                                         <BrowserRouter>
                                                           <Router />
+                                                          <NativeWalletRequestModal />
                                                         </BrowserRouter>
                                                       </MinimizableWindowProvider>
                                                     </MiniAppProvider>

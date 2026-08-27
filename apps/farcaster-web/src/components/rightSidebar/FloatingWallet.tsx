@@ -7,6 +7,7 @@ import {
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { AnalyticsEvent } from 'farcaster-analytics';
 import { useTrackEvent, useVerificationsQuery } from 'farcaster-client-hooks';
+import { store } from 'farcaster-wallet';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 
@@ -33,6 +34,12 @@ function FloatingWallet({
   const { data: verifications } = useVerificationsQuery({ fid });
   const { trackEvent } = useTrackEvent();
 
+  // Subscribe to local wallet store changes so FloatingWallet updates when unlocked/created
+  const [, setEpoch] = React.useState(0);
+  useEffect(() => {
+    return store.subscribe(() => setEpoch((e) => e + 1));
+  }, []);
+
   // Due to limitations in Skia, we need to first render the wallet full width
   // then transition to the correct width.
   const [initializing, setInitializing] = React.useState(true);
@@ -57,28 +64,25 @@ function FloatingWallet({
       (item) =>
         item.label === 'Warpcast Wallet' || item.label === 'Farcaster Wallet',
     );
-    if (!warplet) {
-      return null;
+    if (warplet) {
+      return truncateAddress(warplet.address, 4);
     }
-    return truncateAddress(warplet.address, 4);
+    const localAddr = store.getAddress();
+    if (localAddr) {
+      return truncateAddress(localAddr, 4);
+    }
+    return 'Wallet';
   }, [verifications]);
 
   const { isWarpcastWalletOpen, openWarpcastWallet, closeWarpcastWallet } =
     useOpenableWarpcastWallet();
 
-  // Mount iframe when wallet is first opened
+  // Mount iframe when wallet is first opened (lazy load to avoid startup race with mini_app_modal)
   useEffect(() => {
     if (isWarpcastWalletOpen && !hasBeenOpened) {
       setHasBeenOpened(true);
     }
   }, [isWarpcastWalletOpen, hasBeenOpened]);
-
-  // No eager-load timer: full_warplet only mounts when the user explicitly
-  // opens the wallet. Any fixed timer risks racing with mini_app_modal's
-  // Privy init (which starts immediately when a mini-app opens), producing
-  // a stuck "Confirm it's you" popup. On-demand loading is deterministic —
-  // whichever surface connects first caches the Privy session; the other
-  // connects instantly from that cache.
 
   const { isConnected } = useEmbeddedWalletBridge();
 
@@ -86,8 +90,8 @@ function FloatingWallet({
     if (isWarpcastWalletOpen) {
       closeWarpcastWallet();
     } else {
-      // Track if user opens wallet before lazy loading completed
       if (!hasBeenOpened) {
+        setHasBeenOpened(true);
         trackEvent(AnalyticsEvent.WalletOpenedBeforeLoad, {
           location: 'floating_wallet',
         });
@@ -103,10 +107,6 @@ function FloatingWallet({
   ]);
 
   const [dropdownIsOpen, setDropdownIsOpen] = React.useState(false);
-
-  if (!warpletAddress) {
-    return null;
-  }
 
   return (
     <>
@@ -230,7 +230,7 @@ function WalletDropdownMenu({
       >
         <DropdownMenuItem
           name="Lock wallet"
-          icon={<LockIcon size="small" />}
+          icon={<LockIcon size={16} />}
           onSelect={(e) => {
             e.preventDefault();
             setIsOpen(false);

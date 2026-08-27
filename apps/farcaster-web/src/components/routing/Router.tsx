@@ -540,6 +540,14 @@ const Router: React.FC = () => {
                 path={routes.magicLink.path}
                 element={<routes.magicLink.Component />}
               />
+              <Route
+                path={routes.wallet.path}
+                element={<routes.wallet.Component />}
+              />
+              <Route
+                path={routes.walletIframe.path}
+                element={<routes.walletIframe.Component />}
+              />
               {/*
               Vanity Routes
               These routes must be defined at the bottom of the `Routes` component

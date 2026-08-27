@@ -10,7 +10,8 @@ import { UnauthedRightSideBar } from '~/layouts/UnauthedRightSideBar';
 const UnauthedLayout: FC = () => {
   const hideChromesOnDownload = useIsCurrentRoute(routes.download);
   const hideChromesOnSignup = useIsCurrentRoute(routes.signup);
-  const hideChromesOnRoute = hideChromesOnDownload || hideChromesOnSignup;
+  const hideChromesOnWallet = useIsCurrentRoute(routes.wallet);
+  const hideChromesOnRoute = hideChromesOnDownload || hideChromesOnSignup || hideChromesOnWallet;
 
   return (
     <Container>

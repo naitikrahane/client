@@ -25,14 +25,9 @@ function SubordinateOpenableWarpcastWalletProvider({
     }
   }, [parentIsWarpcastWalletOpen]);
 
-  const openWarpcastWallet = React.useCallback(() => {
-    setIsWarpcastWalletOpen(true);
-  }, []);
-  const closeWarpcastWallet = React.useCallback(() => {
-    setIsWarpcastWalletOpen(false);
-  }, []);
-
   const parentContext = useOpenableWarpcastWallet();
+  const openWarpcastWallet = parentContext.openWarpcastWallet;
+  const closeWarpcastWallet = parentContext.closeWarpcastWallet;
   const openMainWarpcastWallet = parentContext.openWarpcastWallet;
 
   const context = React.useMemo(

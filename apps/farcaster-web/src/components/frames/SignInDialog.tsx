@@ -158,10 +158,7 @@ export const SignInDialog: React.FC<SignInDialogProps> = ({
     refetchOnMount: true,
   });
 
-  const useLocalSiwf =
-    !isGeoRestricted &&
-    userAppContext?.authAddressState === 'added' &&
-    options.acceptAuthAddress;
+  const useLocalSiwf = !isGeoRestricted;
 
   if (useLocalSiwf) {
     return (

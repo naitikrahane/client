@@ -60,18 +60,9 @@ const siwfLog = (...args: unknown[]) => {
 };
 
 const WALLET_ORIGIN = (() => {
-  if (isDev) {
-    return 'http://localhost:8082';
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
   }
-
-  if (window.location.origin === 'https://web-dev.farcaster.xyz') {
-    return 'https://wallet-dev.farcaster.xyz';
-  }
-
-  if (window.location.origin === 'https://web-stage.farcaster.xyz') {
-    return 'https://wallet-stage.farcaster.xyz';
-  }
-
   return 'https://wallet.farcaster.xyz';
 })();
 
@@ -478,22 +469,17 @@ export function EmbeddedWalletBridgeProvider({
     return Provider.from({
       ...bridge.ethProvider,
       async request(request) {
-        const shouldOpenWallet =
+        const useNativeProvider =
           [
-            'eth_requestAccounts',
             'eth_sendTransaction',
             'eth_signTypedData_v4',
             'personal_sign',
             'wallet_sendCalls',
-          ].includes(request.method) &&
-          !(
-            surface === 'mini_app_modal' &&
-            request.method === 'eth_requestAccounts' &&
-            isConnected
-          );
+          ].includes(request.method);
 
-        if (shouldOpenWallet) {
-          openWarpcastWallet();
+        if (useNativeProvider) {
+          const { farcasterWeb3Provider } = await import('farcaster-wallet');
+          return await farcasterWeb3Provider.request(request as any);
         }
 
         try {
@@ -692,13 +678,12 @@ export function EmbeddedWalletIframe({
   }, [initialized, iframeRef, updateWalletTheme, appThemeName]);
 
   const src = useMemo(() => {
-    const url = new URL(
-      surface === 'mini_app_modal'
-        ? `${WALLET_ORIGIN}/MiniAppTransactionModal`
-        : WALLET_ORIGIN,
-    );
+    const url = new URL(WALLET_ORIGIN);
 
     url.searchParams.set('id', id as string);
+    if (surface === 'mini_app_modal') {
+      url.searchParams.set('surface', 'mini_app_modal');
+    }
 
     return url;
   }, [surface, id]);

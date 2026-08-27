@@ -4,6 +4,7 @@ import {
   Archive,
   BellIcon,
   CodeIcon,
+  CreditCard,
   Grid3X3Icon,
   HomeIcon,
   Megaphone,
@@ -125,6 +126,14 @@ const AuthedLeftSideBar: React.FC = React.memo(() => {
             </div>
           </NavLinkIcon>
           <NavLinkLabel>Saved</NavLinkLabel>
+        </NavLink>
+        <NavLink to={'wallet'} params={{}} searchParams={{}} title="Wallet">
+          <NavLinkIcon>
+            <div className="relative translate-y-[-0.75px]">
+              <CreditCard size={20} />
+            </div>
+          </NavLinkIcon>
+          <NavLinkLabel>Wallet</NavLinkLabel>
         </NavLink>
         <NavLink to="settings" params={{}} searchParams={{}} title="Settings">
           <NavLinkIcon>

@@ -764,6 +764,12 @@ export const WalletPage = lazyWithPreload(() =>
   })),
 );
 
+export const WalletIframePage = lazyWithPreload(() =>
+  import('~/pages/wallet/WalletIframePage').then((res) => ({
+    default: res.WalletIframePage,
+  })),
+);
+
 export const ManageAppPage = lazyWithPreload(() =>
   import('~/pages/developers/ManageAppPage').then((res) => ({
     default: res.ManageAppPage,

@@ -140,6 +140,7 @@ import {
   VanityReferralJoinPage,
   VanityReferralLandingPage,
   WalletPage,
+  WalletIframePage,
 } from '~/lazy/pages';
 import { ChannelEditSection } from '~/types/routing';
 
@@ -1247,6 +1248,21 @@ const routes = {
     Component: LaunchMiniAppPage,
   },
 
+  wallet: {
+    path: `${appPathPrefix}/wallet`,
+    params: {},
+    search: {},
+    family: family('default'),
+    Component: WalletPage,
+  },
+  walletIframe: {
+    path: `${appPathPrefix}/wallet-iframe`,
+    params: {},
+    search: {},
+    family: family('default'),
+    Component: WalletIframePage,
+  },
+
   // Vanity Routes
   // These routes must be defined at the end of the object
   // so hooks like `useCurrentRoute` – which take the first route they match –
@@ -1530,13 +1546,7 @@ const routes = {
     family: family('default'),
     Component: ContractAddressTransitionPage,
   },
-  wallet: {
-    path: `${appPathPrefix}/wallet`,
-    params: {},
-    search: {},
-    family: family('default'),
-    Component: WalletPage,
-  },
+
   referrals: {
     path: `${appPathPrefix}/referrals`,
     params: {},
