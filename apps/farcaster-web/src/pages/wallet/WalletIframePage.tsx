@@ -130,18 +130,10 @@ export function WalletIframePage() {
       const ethHandlerRef = {
         current: async (request: any) => {
           let account = store.getAccount();
-          if (!account && !store.isSetup()) {
-            await store.setupWallet('123456');
-            account = store.getAccount();
-          }
 
           // ── Read-only queries (no approval needed) ──
           if (request.method === 'eth_accounts') {
-            let acc = store.getAccount();
-            if (!acc && !store.isSetup()) {
-              await store.setupWallet('123456');
-              acc = store.getAccount();
-            }
+            const acc = store.getAccount();
             return acc ? [acc.address] : [];
           }
           if (request.method === 'eth_chainId') {
@@ -156,13 +148,20 @@ export function WalletIframePage() {
             const currentAcc = store.getAccount();
             if (currentAcc) {
               return [currentAcc.address];
-            } else {
-              // Wait for setup
-              await store.setupWallet('123456');
-              const newAcc = store.getAccount();
-              if (newAcc) return [newAcc.address];
-              throw new Error('No account available');
             }
+            try { warpcast.request({ method: 'open_wallet' } as any); } catch {}
+            return new Promise((resolve, reject) => {
+              store.addPendingRequest({
+                type: 'sign',
+                payload: request,
+                resolve: () => {
+                  const acc = store.getAccount();
+                  if (acc) resolve([acc.address]);
+                  else reject(new Error('No account available'));
+                },
+                reject: (err) => reject(err),
+              });
+            });
           }
 
           // ── Wallet must be unlocked for write operations ──
@@ -204,7 +203,7 @@ export function WalletIframePage() {
                 },
                 resolve: async () => {
                   try {
-                    const wc = createWalletClient({ account, chain: base, transport: http(getRpcUrl()) });
+                    const activeAccount = store.getAccount(); if (!activeAccount) throw new Error("Wallet locked"); const wc = createWalletClient({ account: activeAccount, chain: base, transport: http(getRpcUrl()) });
                     let lastHash = '0x';
                     for (const call of calls) {
                       lastHash = await wc.sendTransaction({
@@ -238,7 +237,7 @@ export function WalletIframePage() {
                 payload: request,
                 resolve: async () => {
                   try {
-                    const wc = createWalletClient({ account, chain: base, transport: http(getRpcUrl()) });
+                    const activeAccount = store.getAccount(); if (!activeAccount) throw new Error("Wallet locked"); const wc = createWalletClient({ account: activeAccount, chain: base, transport: http(getRpcUrl()) });
                     const hash = await wc.sendTransaction({
                       to: request.params[0].to,
                       value: request.params[0].value,
@@ -262,7 +261,7 @@ export function WalletIframePage() {
                 payload: request,
                 resolve: async () => {
                   try {
-                    const wc = createWalletClient({ account, chain: base, transport: http(getRpcUrl()) });
+                    const activeAccount = store.getAccount(); if (!activeAccount) throw new Error("Wallet locked"); const wc = createWalletClient({ account: activeAccount, chain: base, transport: http(getRpcUrl()) });
                     if (request.method === 'personal_sign') {
                       const p0 = request.params?.[0];
                       const p1 = request.params?.[1];

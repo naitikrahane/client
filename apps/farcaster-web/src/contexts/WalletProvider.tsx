@@ -181,8 +181,7 @@ const WalletProvider = ({ children }: WalletProviderProps) => {
                 },
               );
               // Only open modal if fully loaded (prevents premature modal during init)
-              if (isFullyLoaded) {
-                openConnectModal();
+              if (preferredWallet === "warpcast" || !preferredWallet) { if (ethProvider) { return ethProvider.request({ method: "eth_requestAccounts" }); } } else if (isFullyLoaded) { openConnectModal();
               }
 
               // Queue the request to be processed once provider is ready
