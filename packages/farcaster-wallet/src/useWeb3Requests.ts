@@ -18,7 +18,9 @@ export async function approveWeb3Request(id: string) {
       if (!account) throw new Error('Wallet not initialized or locked');
       
       let signature;
-      if (req.payload.method === 'personal_sign') {
+      if (req.payload.method === 'eth_requestAccounts') {
+        signature = [account.address];
+      } else if (req.payload.method === 'personal_sign') {
         const message = req.payload.message || req.payload.params?.[0];
         signature = await account.signMessage({ message: typeof message === 'string' && message.startsWith('0x') ? { raw: message as any } : message });
       } else if (req.payload.method === 'eth_signTypedData_v4') {

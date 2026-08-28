@@ -116,7 +116,14 @@ export const NativeWalletRequestModal: React.FC = () => {
   
   if (isSign) {
     const method = currentRequest.payload.method;
-    if (method === 'personal_sign') {
+    if (method === 'eth_requestAccounts') {
+      decodedContent = (
+        <div className="flex flex-col">
+           <ReceiptRow label="Action" value={<span className="bg-green-500/10 text-green-500 px-2 py-1 rounded font-medium">Connect Wallet</span>} />
+           <ReceiptRow label="Account" value={store.getAddress() || 'Unknown'} isCode={true} />
+        </div>
+      );
+    } else if (method === 'personal_sign') {
       const hexMsg = currentRequest.payload.message || currentRequest.payload.params?.[0];
       try {
         const decoded = typeof hexMsg === 'string' && hexMsg.startsWith('0x') ? fromHex(hexMsg as any, 'string') : hexMsg;

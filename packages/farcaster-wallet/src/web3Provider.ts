@@ -14,7 +14,16 @@ export class FarcasterWeb3Provider {
   private listeners: Map<string, Array<(...args: any[]) => void>> = new Map();
 
   constructor() {
-    // EventEmitter init
+    if (typeof window !== 'undefined') {
+      let lastAddress = store.getAccount()?.address || null;
+      store.subscribe(() => {
+        const newAddress = store.getAccount()?.address || null;
+        if (newAddress !== lastAddress) {
+          lastAddress = newAddress;
+          this.emit('accountsChanged', newAddress ? [newAddress] : []);
+        }
+      });
+    }
   }
 
   public on(event: string, listener: (...args: any[]) => void) {
