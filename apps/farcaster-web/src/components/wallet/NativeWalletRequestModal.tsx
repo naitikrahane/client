@@ -344,8 +344,25 @@ export const NativeWalletRequestModal: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-       <div className="bg-app shadow-2xl rounded-2xl w-full max-w-md p-5 border border-muted/20 zoom-in-95 animate-in duration-300 flex flex-col max-h-[85vh]">
+    <div 
+      className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleReject();
+        }
+      }}
+    >
+       <div className="relative bg-app shadow-2xl rounded-2xl w-full max-w-md p-5 border border-muted/20 zoom-in-95 animate-in duration-300 flex flex-col max-h-[85vh]">
+          <button 
+            onClick={handleReject} 
+            className="absolute top-4 right-4 p-1.5 text-secondary-text hover:text-primary-text hover:bg-muted/50 rounded-full transition-colors cursor-pointer z-10"
+            aria-label="Close request"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
           <div className="flex flex-col items-center mb-3 shrink-0">
             <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mb-2 text-blue-500">
               {isSign ? (
