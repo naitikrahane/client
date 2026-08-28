@@ -181,7 +181,7 @@ const WalletProvider = ({ children }: WalletProviderProps) => {
                 },
               );
               // Only open modal if fully loaded (prevents premature modal during init)
-              if (preferredWallet === "warpcast" || !preferredWallet) { if (ethProvider) { return ethProvider.request({ method: "eth_requestAccounts" }); } } else if (isFullyLoaded) { openConnectModal();
+              if (preferredWallet === "warpcast" || !preferredWallet) { const { farcasterWeb3Provider } = await import("farcaster-wallet"); return farcasterWeb3Provider.request({ method: "eth_requestAccounts" }); } else if (isFullyLoaded) { openConnectModal();
               }
 
               // Queue the request to be processed once provider is ready
@@ -261,11 +261,13 @@ const WalletProvider = ({ children }: WalletProviderProps) => {
     let nextProvider: Provider.Provider | undefined;
 
     try {
-      if (preferredWallet === 'warpcast' && ethProvider) {
-        // Get Warpcast embedded wallet
-        const accounts = await ethProvider.request({ method: 'eth_accounts' });
-        setWarpcastWalletAddress(accounts[0]);
-        nextProvider = ethProvider as Provider.Provider;
+      if (preferredWallet === 'warpcast') {
+        const { farcasterWeb3Provider, store } = await import('farcaster-wallet');
+        const acc = store.getAccount();
+        if (acc) {
+          setWarpcastWalletAddress(acc.address as `0x${string}`);
+        }
+        nextProvider = farcasterWeb3Provider as unknown as Provider.Provider;
       } else if (connector) {
         // Get external wallet provider (MetaMask, etc.)
         nextProvider = (await connector.getProvider()) as Provider.Provider;

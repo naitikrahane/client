@@ -345,9 +345,9 @@ export const NativeWalletRequestModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-       <div className="bg-app shadow-2xl rounded-2xl w-full max-w-md p-6 border border-muted/20 zoom-in-95 animate-in duration-300">
-          <div className="flex flex-col items-center mb-6">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 text-blue-500">
+       <div className="bg-app shadow-2xl rounded-2xl w-full max-w-md p-5 border border-muted/20 zoom-in-95 animate-in duration-300 flex flex-col max-h-[85vh]">
+          <div className="flex flex-col items-center mb-3 shrink-0">
+            <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mb-2 text-blue-500">
               {isSign ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22h6"/><path d="M15.2 3.2a2.82 2.82 0 1 1 4 4L7.5 19 3 20l1-4.5z"/></svg>
               ) : (
@@ -362,7 +362,7 @@ export const NativeWalletRequestModal: React.FC = () => {
             </p>
           </div>
           
-          <div className="bg-muted p-4 rounded-xl mb-6 border border-muted/30">
+          <div className="overflow-y-auto flex-1 pr-1 mb-3"><div className="bg-muted p-3.5 rounded-xl mb-3 border border-muted/30">
             {decodedContent}
           </div>
           
@@ -372,9 +372,7 @@ export const NativeWalletRequestModal: React.FC = () => {
             </div>
           )}
           
-          <div className="flex gap-3 w-full">
-             <button 
-                onClick={handleReject} 
+          </div><div className="flex gap-3 w-full shrink-0 pt-2 border-t border-muted/20"><button onClick={handleReject} 
                 className="flex-1 py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold hover:bg-red-500/20 active:scale-95 transition-all"
              >
                 Reject
