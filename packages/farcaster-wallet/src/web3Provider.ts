@@ -42,10 +42,7 @@ export class FarcasterWeb3Provider {
     const { method, params = [] } = req;
     let account = store.getAccount();
 
-    if (!account && !store.isSetup()) {
-      await store.setupWallet('123456');
-      account = store.getAccount();
-    }
+
 
     // ── Read-only RPC methods ──
     if (method === 'eth_accounts') {
@@ -87,12 +84,7 @@ export class FarcasterWeb3Provider {
       });
     }
 
-    // Must have account for remaining methods
-    if (!account) {
-      const err = new Error('Unauthorized: wallet locked');
-      (err as any).code = 4100;
-      throw err;
-    }
+    // Account check removed so pending requests open NativeWalletRequestModal for setup/unlock
 
     // ── EIP-5792 Send Calls ──
     if (method === 'wallet_sendCalls') {

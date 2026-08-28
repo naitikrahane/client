@@ -29,7 +29,7 @@ export async function approveWeb3Request(id: string) {
       }
       
       store.addTransaction({
-        hash: Date.now().toString(),
+        hash: `sig_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         type: 'sign',
         status: 'confirmed',
         timestamp: Date.now(),

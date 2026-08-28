@@ -3,6 +3,7 @@ import { subscribeToWeb3Requests, approveWeb3Request, rejectWeb3Request, store, 
 import type { PendingRequest } from 'farcaster-wallet';
 import { cn } from '~/lib/utils';
 import { fromHex, formatEther, parseUnits } from 'viem';
+import { WalletUI } from '~/wallet/WalletUI';
 
 const NetworkLogo = ({ chainId, className }: { chainId: number, className?: string }) => {
   const [error, setError] = useState(false);
@@ -22,6 +23,8 @@ const NetworkLogo = ({ chainId, className }: { chainId: number, className?: stri
 
 export const NativeWalletRequestModal: React.FC = () => {
   const [requests, setRequests] = useState<PendingRequest[]>([]);
+  const [isSetup, setIsSetup] = useState(() => store.isSetup());
+  const [isLocked, setIsLocked] = useState(() => store.isLocked());
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -30,9 +33,17 @@ export const NativeWalletRequestModal: React.FC = () => {
   const [forceRender, setForceRender] = useState(0);
 
   useEffect(() => {
-    return subscribeToWeb3Requests((newRequests) => {
+    const unsubWeb3 = subscribeToWeb3Requests((newRequests) => {
       setRequests(newRequests);
     });
+    const unsubStore = store.subscribe(() => {
+      setIsSetup(store.isSetup());
+      setIsLocked(store.isLocked());
+    });
+    return () => {
+      unsubWeb3();
+      unsubStore();
+    };
   }, []);
 
   const currentRequestId = requests.length > 0 ? requests[0].id : null;
@@ -44,6 +55,19 @@ export const NativeWalletRequestModal: React.FC = () => {
   }, [currentRequestId]);
 
   if (requests.length === 0) return null;
+
+  if (!isSetup || isLocked) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <WalletUI surface="mini_app_modal" onClose={() => {
+           // We could reject the request here, or let them click outside
+           if (requests.length > 0) {
+             rejectWeb3Request(requests[0].id);
+           }
+        }} />
+      </div>
+    );
+  }
 
   const currentRequest = requests[0];
   const isSign = currentRequest.type === 'sign';

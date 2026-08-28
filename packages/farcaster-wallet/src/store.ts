@@ -76,13 +76,14 @@ export class WalletStore {
               payload,
               resolve: (result: any) => {
                 if (e.source && 'postMessage' in e.source) {
-                  (e.source as Window).postMessage({ type: 'FC_WALLET_PENDING_REQUEST_RESOLVE', id, result }, '*');
+                  const targetOrigin = (e.origin && e.origin !== 'null') ? e.origin : window.location.origin;
+                  (e.source as Window).postMessage({ type: 'FC_WALLET_PENDING_REQUEST_RESOLVE', id, result }, targetOrigin);
                 }
                 this.resolveRequest(id, result);
               },
               reject: (reason: any) => {
                 if (e.source && 'postMessage' in e.source) {
-                  (e.source as Window).postMessage({ type: 'FC_WALLET_PENDING_REQUEST_REJECT', id, error: reason?.message || 'Rejected' }, '*');
+                  (e.source as Window).postMessage({ type: 'FC_WALLET_PENDING_REQUEST_REJECT', id, error: reason?.message || 'Rejected' }, targetOrigin);
                 }
                 this.rejectRequest(id, reason);
               },
@@ -360,7 +361,7 @@ export class WalletStore {
             payload: request.payload,
             requestType: request.type,
           },
-          '*',
+          window.location.origin,
         );
       } catch {}
     }
