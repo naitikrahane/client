@@ -67,6 +67,11 @@ export class WalletStore {
       });
 
       window.addEventListener('message', (e) => {
+        const targetOrigin = (e.origin && e.origin !== 'null') ? e.origin : window.location.origin;
+        if (e.origin && e.origin !== 'null' && e.origin !== window.location.origin && !e.origin.startsWith('http://localhost') && !e.origin.startsWith('https://localhost')) {
+          return;
+        }
+
         if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_ADD') {
           const { id, payload, requestType } = e.data;
           if (!this.pendingRequests.find(r => r.id === id)) {
@@ -76,7 +81,6 @@ export class WalletStore {
               payload,
               resolve: (result: any) => {
                 if (e.source && 'postMessage' in e.source) {
-                  const targetOrigin = (e.origin && e.origin !== 'null') ? e.origin : window.location.origin;
                   (e.source as Window).postMessage({ type: 'FC_WALLET_PENDING_REQUEST_RESOLVE', id, result }, targetOrigin);
                 }
                 this.resolveRequest(id, result);
@@ -93,7 +97,9 @@ export class WalletStore {
         } else if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_RESOLVE') {
           this.resolveRequest(e.data.id, e.data.result);
         } else if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_REJECT') {
-          this.rejectRequest(e.data.id, new Error(e.data.error || 'Rejected'));
+          const err = new Error(e.data.error || 'User rejected request') as any;
+          err.code = 4001;
+          this.rejectRequest(e.data.id, err);
         }
       });
     }
@@ -168,28 +174,7 @@ export class WalletStore {
   }
 
   public getUnlockedKey(): string | null {
-    if (this.unlockedKey) return this.unlockedKey;
-    try {
-      // Check local sessionStorage
-      let stored = sessionStorage.getItem('fc_wallet_key');
-      
-      // If we are in an iframe (same-origin), check parent's sessionStorage
-      if (!stored && typeof window !== 'undefined' && window !== window.parent) {
-        try { stored = window.parent.sessionStorage.getItem('fc_wallet_key'); } catch {}
-      }
-
-      if (stored) {
-         const lastActive = parseInt(sessionStorage.getItem('fc_wallet_last_active') || '0');
-         if (Date.now() - lastActive < 1000 * 60 * 60) { // 1 hour timeout
-            this.unlockedKey = stored;
-            this.updateActivity();
-            return stored;
-         } else {
-            this.lock();
-         }
-      }
-    } catch {}
-    return null;
+    return this.unlockedKey;
   }
 
   private updateActivity() {
@@ -207,10 +192,6 @@ export class WalletStore {
 
   public lock(): void {
     this.unlockedKey = null;
-    try {
-      sessionStorage.removeItem('fc_wallet_key');
-      sessionStorage.removeItem('fc_wallet_last_active');
-    } catch {}
   }
 
   public async unlock(password: string): Promise<boolean> {

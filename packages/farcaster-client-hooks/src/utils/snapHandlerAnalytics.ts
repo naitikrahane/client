@@ -96,7 +96,7 @@ function getSnapSourceBucket(url: string | null | undefined): SnapSourceBucket {
 
   if (
     domain.endsWith('.neynar.app') ||
-    domain === 'snap-builder-api.REPLACE_ME.workers.dev'
+    domain.endsWith('.workers.dev') || domain === 'snap-builder-api.REPLACE_ME.workers.dev'
   ) {
     return 'generated';
   }

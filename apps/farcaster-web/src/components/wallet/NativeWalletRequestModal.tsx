@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { subscribeToWeb3Requests, approveWeb3Request, rejectWeb3Request, store, getChainById, POPULAR_TOKENS } from 'farcaster-wallet';
 import type { PendingRequest } from 'farcaster-wallet';
 import { cn } from '~/lib/utils';
-import { fromHex, formatEther, parseUnits } from 'viem';
+import { fromHex, formatEther, formatUnits, parseUnits } from 'viem';
 import { WalletUI } from '~/wallet/WalletUI';
 
 const NetworkLogo = ({ chainId, className }: { chainId: number, className?: string }) => {
@@ -231,7 +231,7 @@ export const NativeWalletRequestModal: React.FC = () => {
           if (rawAmountStr.toLowerCase() === 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') {
             decodedErc20Amount = 'Unlimited';
           } else {
-            decodedErc20Amount = (Number(rawAmount) / (10 ** token.decimals)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+            decodedErc20Amount = formatUnits(BigInt(rawAmount), token.decimals);
           }
         } else {
           erc20Symbol = "Unknown Token";

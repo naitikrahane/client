@@ -139,6 +139,16 @@ export async function approveWeb3Request(id: string) {
           amount: req.payload.metadata?.amount,
           symbol: req.payload.metadata?.symbol,
         });
+
+        const currentHash = txHash;
+        publicClient.waitForTransactionReceipt({ hash: currentHash as `0x${string}` })
+          .then((receipt) => {
+            const status = receipt.status === 'success' ? 'confirmed' : 'failed';
+            store.updateTransaction(currentHash, status);
+          })
+          .catch(() => {
+            store.updateTransaction(currentHash, 'failed');
+          });
       }
       
       store.resolveRequest(id, req.payload.method === 'wallet_sendCalls' ? txHash : txHash);

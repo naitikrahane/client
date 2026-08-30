@@ -1720,6 +1720,9 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@^6.0.2
         version: '@typescript/typescript6@6.0.2'
+      vitest:
+        specifier: ^3.1.1
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@24.13.3)(jiti@2.7.0)(jsdom@20.0.3(bufferutil@4.1.0)(utf-8-validate@6.0.6))(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/tsconfig: {}
 
