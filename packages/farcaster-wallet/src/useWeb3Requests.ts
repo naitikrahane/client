@@ -1,3 +1,4 @@
+import { ProviderRpcError } from './store';
 import { store, type PendingRequest } from './store';
 
 export function subscribeToWeb3Requests(callback: (requests: PendingRequest[]) => void) {
@@ -159,7 +160,7 @@ export async function approveWeb3Request(id: string) {
 }
 
 export function rejectWeb3Request(id: string) {
-  const error = new Error('User rejected request') as any;
-  error.code = 4001;
+  const error = new ProviderRpcError('User rejected request', 4001);
   store.rejectRequest(id, error);
 }
+

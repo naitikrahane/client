@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageChannelRpc } from 'farcaster-client-data';
 import { WalletUI } from '~/wallet/WalletUI';
-import { store, getPublicClient } from 'farcaster-wallet';
+import { store, getPublicClient, ProviderRpcError } from 'farcaster-wallet';
 import { createWalletClient, http } from 'viem';
 import { base } from 'viem/chains';
 
@@ -348,8 +348,7 @@ export function WalletIframePage() {
     store.resolveRequest(req.id, true);
   };
   const handleReject = (req: any) => {
-    const error = new Error('User rejected request') as any;
-    error.code = 4001;
+    const error = new ProviderRpcError('User rejected request', 4001);
     store.rejectRequest(req.id, error);
   };
 
@@ -460,4 +459,5 @@ export function WalletIframePage() {
 }
 
 export default WalletIframePage;
+
 

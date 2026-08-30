@@ -1,6 +1,15 @@
 import { generateMnemonic, mnemonicToAccount, privateKeyToAccount, english, type HDAccount, type PrivateKeyAccount } from 'viem/accounts';
 import { encryptData, decryptData, type EncryptedData } from './crypto';
 
+export class ProviderRpcError extends Error {
+  public code: number;
+  constructor(message: string, code: number) {
+    super(message);
+    this.code = code;
+    this.name = 'ProviderRpcError';
+  }
+}
+
 const WALLET_STORAGE_KEY = 'fc_wallet_state';
 
 export type CustomToken = {
@@ -67,10 +76,11 @@ export class WalletStore {
       });
 
       window.addEventListener('message', (e) => {
-        const targetOrigin = (e.origin && e.origin !== 'null') ? e.origin : window.location.origin;
-        if (e.origin && e.origin !== 'null' && e.origin !== window.location.origin && !e.origin.startsWith('http://localhost') && !e.origin.startsWith('https://localhost')) {
+        if (e.origin !== window.location.origin) {
           return;
         }
+
+        const targetOrigin = window.location.origin;
 
         if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_ADD') {
           const { id, payload, requestType } = e.data;
@@ -97,8 +107,7 @@ export class WalletStore {
         } else if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_RESOLVE') {
           this.resolveRequest(e.data.id, e.data.result);
         } else if (e.data?.type === 'FC_WALLET_PENDING_REQUEST_REJECT') {
-          const err = new Error(e.data.error || 'User rejected request') as any;
-          err.code = 4001;
+          const err = new ProviderRpcError(e.data.error || 'User rejected request', 4001);
           this.rejectRequest(e.data.id, err);
         }
       });
@@ -199,7 +208,6 @@ export class WalletStore {
     try {
       this.unlockedKey = await decryptData(password, this.state.encryptedKey);
       try {
-        sessionStorage.setItem('fc_wallet_key', this.unlockedKey);
         this.updateActivity();
       } catch {}
       return true;
@@ -235,7 +243,6 @@ export class WalletStore {
     this.state.isMnemonic = isMnemonic;
     this.unlockedKey = finalKey;
     try {
-      sessionStorage.setItem('fc_wallet_key', finalKey);
       this.updateActivity();
     } catch {}
     this.state.address = this.getAccount()?.address || null;
@@ -369,3 +376,5 @@ export class WalletStore {
 }
 
 export const store = WalletStore.getInstance();
+
+
